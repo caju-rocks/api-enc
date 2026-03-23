@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for, request, jsonify
 from sqlalchemy.exc import IntegrityError
 
 from app import app, db
-from app.models import Sector, ClimbRoutes
+from app.models import Sectors, ClimbRoutes
 
 
 @app.route('/')
@@ -12,7 +12,7 @@ def index():
 @app.route('/sectors', methods=['POST'])
 def create_sector():
     data = request.get_json()
-    sector = Sector(
+    sector = Sectors(
         name=data['name'], 
         city=data['city'], 
         state=data['state'], 
@@ -29,12 +29,12 @@ def create_sector():
 
 @app.route('/sectors', methods=['GET'])
 def get_sector():
-    sectors = Sector.query.all()
+    sectors = Sectors.query.all()
     return jsonify([sector.to_dict() for sector in sectors])
 
 @app.route('/sectors/<int:sector_id>', methods=['PUT'])
 def update_sector(sector_id):
-    sector = Sector.query.get(sector_id)
+    sector = Sectors.query.get(sector_id)
     if sector:
         data = request.get_json()
         sector.name = data['name']
@@ -50,7 +50,7 @@ def update_sector(sector_id):
 @app.route('/climb-routes', methods=['POST'])
 def create_climb_routes():
     data = request.get_json()
-    sector = Sector.query.get(data['sector_id'])
+    sector = Sectors.query.get(data['sector_id'])
     if sector:
         climb_route = ClimbRoutes(
             name=data['name'],

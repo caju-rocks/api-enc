@@ -1,10 +1,20 @@
 # from geoalchemy2 import Geometry
+import uuid
 
 from sqlalchemy.dialects.postgresql import JSON
 from app import db
 
-class Sector(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class Users(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.String, primary_key=True, default=str(uuid.uuid4()), unique=True)
+    first_name = db.Column(db.String)
+    last_name = db.Column(db.String)
+    auth_user_id = db.Column(db.String)
+    auth_user = db.relationship('Users', backref=('auth.users'), primaryjoin='foreign(Users.auth_user_id) == remote(Users.id)')
+
+class Sectors(db.Model):
+    __tablename__ = 'sectors'
+    id = db.Column(db.String, primary_key=True, default=str(uuid.uuid4()), unique=True)
     name = db.Column(db.String, unique=True)
     city = db.Column(db.String)
     state = db.Column(db.String)
@@ -32,15 +42,16 @@ class Sector(db.Model):
             'state': self.state,
             'description': self.description,
             'how_to_get_there': self.how_to_get_there
-        }    
+        }
 
 class ClimbRoutes(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    __tablename__ = 'climb_routes'
+    id = db.Column(db.String, primary_key=True, default=str(uuid.uuid4()), unique=True)
     name = db.Column(db.String)
     grade = db.Column(JSON)
-    sector_id = db.Column(db.Integer, db.ForeignKey('sector.id'), nullable=False)
+    sector_id = db.Column(db.String, db.ForeignKey('sectors.id'), nullable=False)
 
-    sector = db.relationship('Sector', backref=db.backref('climb_routes', lazy=True))
+    sector = db.relationship('Sectors', backref=db.backref('climb_routes', lazy=True))
     
     def __repr__(self):
         return f"ClimbRoute(name='{self.name}', sector='{self.sector.name}')"
